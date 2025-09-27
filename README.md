@@ -16,7 +16,7 @@ You can create a new file directly from Visual Studio Code (or any editor you pr
 
 Name the file `player.rs`. 
 
-At the very top of `state.rs`, add the following line so it can reference items from lib.rs:
+At the very top of `player.rs`, add the following line so it can reference items from lib.rs:
 
 ```rust
 use crate::*;
@@ -44,7 +44,7 @@ Now that we have a file that is recognized and enabled let's add structs for `pl
 
 ## Player and Item Structs
 
-Inside the newly created `player.rs` file lets add:
+Inside the newly created `player.rs` file let's add:
 
 ```rust
 #[turbo::serialize]
@@ -67,7 +67,7 @@ These two structs contain some basic fields that you might have inside of a `pla
 
 In order to make an inventory system the `inventory` field is required as well as the `item` struct.
 
-Now we need to add a `player::new()` function, we'll do this inside a player `impl` block:
+Now we need to add a `player::new()` function as well as a `player::use_item()` function, we'll do this inside a player `impl` block:
 
 ```rust
 impl Player {
@@ -79,31 +79,58 @@ impl Player {
             inventory: vec![
                 Item {
                     name: "Hp Potion".to_string(),
-                    description: "Restores your hp".to_string(),
+                    description: "Increase your hp".to_string(),
                     quantity: 1,
                 },
                 Item {
                     name: "Mp Potion".to_string(),
-                    description: "Restores your mp".to_string(),
+                    description: "Increase your mp".to_string(),
                     quantity: 1,
                 },
+                Item {
+                    name: "Limited Edition Turbi".to_string(),
+                    description: "Do not sell this!".to_string(),
+                    quantity: 1,
+                }
             ]
         }
     }
+
+    pub fn use_item(&mut self, index: usize) {
+        let item = &mut self.inventory[index];
+        if item.quantity > 0 {
+            match item.name.as_str() {
+                "Hp Potion" => {
+                    self.hp += 20.0;
+                    log!("Used HP Potion!");
+                }
+                "Mp Potion" => {
+                    self.mp += 50.0;
+                    log!("Used MP Potion!");
+                }
+                "Limited Edition Turbi" => {
+                    self.money += 100.0;
+                    log!("Sold the Turbi! How could you!");
+                }
+                _ => {}
+            }
+            item.quantity -= 1;
+        } 
+    }
 }
 ```
-> Make sure you make the function `pub` otherwise you won't be able to initialize it in the next step!
+> Make sure you make the function is public or `pub` otherwise you won't be able to initialize it in the next step!
 
-Now that we have a two `structs` and an `impl` inside the `player.rs` we can move over to the `lib.rs` to intialize some fields.
+Now that we have our `impl` and `structs` inside the `player.rs` we can move over to the `lib.rs` to initialize some fields.
 
 > [!TIP]
-> At this point I recommend running your project with `turbo run -w` from inside visual studio code terminal
-> or `turbo run -w nameofproject` from your systems terminal.
-> so you can view realtime updates with Cmd+S/Ctrl+S (saving) and Cmd+R/Ctrl+R (reloading), this is one of Turbos biggest strengths!
+> At this point I recommend running your project with `turbo run -w` from inside Visual Studio Code terminal
+> or `turbo run -w nameofproject` from your system terminal.
+> so you can view real-time updates with Cmd+S/Ctrl+S (saving) and Cmd+R/Ctrl+R (reloading), this is one of Turbos biggest strengths!
 
-# # Initializing GameState Fields & UI
+## Initializing GameState Fields & UI
 
-Now that we have everything in `player.rs` we need to intialize it in `GameState`.
+In `GameState` we are going to add a `player` field and make it a `Player`. additionally we'll add a `selected_item` field and make that a `usize`.
 
 ```rust
 #[turbo::game]
@@ -127,10 +154,11 @@ impl GameState {
 }
 ```
 
-We are just adding a `player` field and intializing it to `Player::new()` and a `selected_item` field that is initialized to `0`.
+Intialize `player` to `Player::new()` and `selected_item` to `0`.
 
 Now we need a basic UI to display the Player and all their stats (items, inventory, hp, etc.) Feel free to use mine or personalize your own.
 
+> If you make your own just make sure to display the player's stats as well as a selector to indicate what item the `state.selected_item` is currently selecting!
 ```rust
 fn ui(state: &mut GameState) {
     let hp = format!("hp: {}/{}", state.player.hp, state.player.hp);
@@ -164,16 +192,38 @@ You also need to add it to the update loop in order view the changes, go ahead a
 ```rust
     pub fn update(&mut self) {
         ui(self);
-        if gamepad::get(0).up.just_pressed() {
-            self.selected_item = 0;
-        };
-        if gamepad::get(0).down.just_pressed() {
-            self.selected_item = 1;
+        let len = self.player.inventory.len();
+        if len > 0 {
+            let gp = gamepad::get(0);
+            if gp.down.just_pressed() {
+                self.selected_item = (self.selected_item + 1) % len;
+            }
+            if gp.up.just_pressed() {
+                self.selected_item = (self.selected_item + len - 1) % len;
+            }
+        }
+        if gamepad::get(0).a.just_pressed() {
+            self.player.use_item(self.selected_item);
         }
     }
 ```
+> [!TIP]
+> Using `len()` will allow you to make expandable controls if your list gets bigger or smaller, I highly recommend it!
 
-if you have your project running once you hit save (Cmd + S/Ctrl + S) you should see this
+if you have your project running once you hit save (Cmd + S/Ctrl + S) you should see something like this
 
+<img src="https://github.com/user-attachments/assets/645acdc2-10e5-4a9c-be65-cc5b2489693f" alt="Turbo" width="502">
+
+Because of the controls and display you should be able to interact with your inventory and see the `qty` reduce with each item use.
+
+## Ending Notes
+
+With a `Z` press you can sell or use the items I've added to the inventory. If you want to add more items to the inventory just add them in the `player::new()` and make sure to give them a use in `player::use_item()`.
+
+This has been a very basic inventory system using a selector and a few structs.
+
+You can easily expand this system by adding an item database, shop interface, buy/sell/add item functions, and more!
+
+Make sure to like and subscribe if you watched the video and join our [Discord](https://discord.gg/V5YWWvQvKW) for active help! 
 
 
