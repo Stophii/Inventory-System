@@ -177,11 +177,8 @@ fn ui(state: &mut GameState) {
         text_box!(&line, x = 25, y = y);
     }
 
-    if state.selected_item == 0 {
-        rect!(x = 15, y = 71, w = 6, h = 6, rotation = 45, color = 0xff0000ff);
-    } else {
-        rect!(x = 15, y = 81, w = 6, h = 6, rotation = 45, color = 0xff0000ff);
-    }
+    let y = 71 + (state.selected_item as i32) * 10;
+    rect!(x = 15, y = y, w = 6, h = 6, rotation = 45, color = 0xff0000ff);
 }
 ```
 
@@ -191,7 +188,7 @@ You also need to add it to the update loop in order view the changes, go ahead a
 
 ```rust
     pub fn update(&mut self) {
-        ui(self);
+        ui(self); // <- adding UI so it is visible
         let len = self.player.inventory.len();
         if len > 0 {
             let gp = gamepad::get(0);
