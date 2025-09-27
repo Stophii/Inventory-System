@@ -211,7 +211,11 @@ if you have your project running once you hit save (Cmd + S/Ctrl + S) you should
 
 <img src="https://github.com/user-attachments/assets/645acdc2-10e5-4a9c-be65-cc5b2489693f" alt="Turbo" width="502">
 
-Because of the controls and display you should be able to interact with your inventory and see the `qty` reduce with each item use.
+Because of the controls and display you should be able to interact with your inventory and see the effect happen and the quantity reduce with each item use.
+
+> [!TIP]
+> We added `log!` to each item use so you can check your terminal to see if an item was used.
+> Using log is a greatway to debug and test systems you are building!
 
 ## Ending Notes
 
