@@ -2,7 +2,7 @@
 
 ## Description
 
-A video guide on [`inventory systems`](https://www.youtube.com/watch?v=lfokR_8JLME&t=68s) is located here if you want to follow along!
+A video guide on [`inventory systems`](https://youtu.be/_C61EC0it6I) is located here if you want to follow along!
 
 ## Starting off
 
